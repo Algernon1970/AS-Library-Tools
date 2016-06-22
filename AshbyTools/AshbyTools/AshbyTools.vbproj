@@ -82,6 +82,7 @@
     </Compile>
     <Compile Include="SchoolSettings.vb" />
     <Compile Include="Sendmail.vb" />
+    <Compile Include="Simple3Des.vb" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="My Project\Resources.resx">
