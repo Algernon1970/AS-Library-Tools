@@ -44,6 +44,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Data" />
     <Reference Include="System.DirectoryServices.AccountManagement" />
     <Reference Include="System.Xml" />
@@ -80,6 +81,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="ProtectSettings.vb" />
     <Compile Include="SchoolSettings.vb" />
     <Compile Include="Sendmail.vb" />
     <Compile Include="Simple3Des.vb" />
