@@ -6,7 +6,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{845E5FDA-4707-4DC3-BCE5-A7A3DD4411F0}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>ADTools</RootNamespace>
+    <RootNamespace>AshbyTools</RootNamespace>
     <AssemblyName>AshbyTools</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <MyType>Windows</MyType>
@@ -81,6 +81,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="ProcessExtensions.vb" />
     <Compile Include="ProtectSettings.vb" />
     <Compile Include="SchoolSettings.vb" />
     <Compile Include="Sendmail.vb" />

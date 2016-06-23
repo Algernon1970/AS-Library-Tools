@@ -1,7 +1,7 @@
 ﻿Imports System.Configuration
-Module ProtectSettings
+Public Module ProtectSettings
 
-    Private Sub protectSettings()
+    Public Sub protectSettings()
         Dim config As Configuration = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None)
         config.ConnectionStrings.SectionInformation.ProtectSection(Nothing)
         ' We must save the changes to the configuration file.
