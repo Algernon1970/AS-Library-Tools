@@ -1,4 +1,6 @@
 ﻿Imports System.DirectoryServices.AccountManagement
+Imports System.Windows.Forms
+
 
 Public Module ADTools
     Dim msg As New eMailMessage
@@ -154,7 +156,7 @@ Public Module ADTools
         End Try
     End Function
 
-    Public Function getUserPrincipalbyUsername(ByVal ctx As PrincipalContext, userName As String) As DirectoryServices.AccountManagement.UserPrincipal
+    Public Function getUserPrincipalbyUsername(ByVal ctx As PrincipalContext, userName As String) As UserPrincipal
         Try
             Dim usr As DirectoryServices.AccountManagement.UserPrincipal = DirectoryServices.AccountManagement.UserPrincipal.FindByIdentity(ctx, userName)
             Return usr
@@ -255,6 +257,56 @@ Public Module ADTools
             Return Nothing
         End Try
     End Function
+
+#Region "ADTree"
+    Public Function getUserTree(ctx As PrincipalContext) As UserTree
+        Dim uTree As New UserTree
+        uTree.name = "DC=internal"
+        uTree.type = containerType.dn
+
+        Dim uList As List(Of UserPrincipalex) = getAllUsers(ctx)
+        For Each user As UserPrincipalex In uList
+            addToTree(user, uTree)
+        Next
+        Return uTree
+    End Function
+
+    Public Sub addToTree(ByVal user As UserPrincipalex, ByVal uTree As UserTree)
+        'get treeNode from user's DistingushedName
+        Dim locations As String() = reverseArray(user.DistinguishedName.Split(","))
+        Dim treeNode As UserTree = getReleventNode(locations, uTree)
+        If treeNode.userList Is Nothing Then
+            treeNode.userList = New List(Of UserPrincipalex)
+        End If
+        treeNode.userList.Add(user)
+
+    End Sub
+
+    Public Function getReleventNode(ByVal locations As String(), ByVal cNode As UserTree) As UserTree
+        Dim userNode As UserTree = cNode
+        For i As Integer = 2 To locations.Count - 2
+            userNode = findMatchingNode(locations(i), userNode)
+        Next
+        Return userNode
+    End Function
+
+    Private Function findMatchingNode(ByVal locationName As String, cNode As UserTree) As UserTree
+        If cNode.children IsNot Nothing Then
+            For Each node As UserTree In cNode.children
+                If node.name.Equals(locationName) Then
+                    Return node
+                End If
+            Next
+        Else
+            cNode.children = New List(Of UserTree)
+        End If
+
+        Dim newNode As UserTree = New UserTree
+        newNode.name = locationName
+        cNode.children.Add(newNode)
+        Return newNode
+    End Function
+#End Region
 End Module
 
 <DirectoryRdnPrefix("CN")>
@@ -415,4 +467,18 @@ Public Class groupDetails
             _name = value
         End Set
     End Property
+End Class
+
+Public Enum containerType
+        dn
+        ou
+        cn
+    End Enum
+
+Public Class UserTree
+    Property type As containerType
+    Property name As String
+    Property parent As UserTree
+    Property children As List(Of UserTree)
+    Property userList As List(Of UserPrincipalex)
 End Class
