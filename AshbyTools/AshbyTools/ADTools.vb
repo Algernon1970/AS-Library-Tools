@@ -8,6 +8,8 @@ Public Module ADTools
     Dim tutorsCTX As PrincipalContext = getConnection("as.internal", tutorsCTXString)
     Dim yearCTX As PrincipalContext = getConnection("as.internal", yearCTXString)
     Dim classCTX As PrincipalContext = getConnection("as.internal", classCTXString)
+    Dim myUTree As UserTree
+    Dim rflag As Boolean = False
 
     Public Sub setupMail(ByVal eMailFrom As String, ByVal Optional eMailto As String = "itsupport@ashbyschool.org.uk",
                          Optional ByVal emailSubject As String = "Automailed Message", Optional ByVal body As String = "Blank",
@@ -268,6 +270,7 @@ Public Module ADTools
         For Each user As UserPrincipalex In uList
             addToTree(user, uTree)
         Next
+        myUTree = uTree
         Return uTree
     End Function
 
@@ -290,7 +293,7 @@ Public Module ADTools
         Return userNode
     End Function
 
-    Private Function findMatchingNode(ByVal locationName As String, cNode As UserTree) As UserTree
+    Public Function findMatchingNode(ByVal locationName As String, cNode As UserTree) As UserTree
         If cNode.children IsNot Nothing Then
             For Each node As UserTree In cNode.children
                 If node.name.Equals(locationName) Then
@@ -306,7 +309,29 @@ Public Module ADTools
         cNode.children.Add(newNode)
         Return newNode
     End Function
+
+    Public Function getNodeByPath(ByVal path As String) As UserTree
+        rflag = False
+        Return (getNodeByPath(path, myUTree))
+    End Function
+
+    Private Function getNodeByPath(ByVal path As String, treeNode As UserTree) As UserTree
+        If rflag Then Return treeNode
+        If treeNode.children Is Nothing Then
+            rflag = True
+            Return treeNode
+        End If
+        For Each pathElement As String In path.Split(",")
+            For Each childnode As UserTree In treeNode.children
+                If childnode.name.Equals(pathElement) Then
+                    Return getNodeByPath(path.Replace(pathElement & ",", ""), childnode)
+                End If
+            Next
+        Next
+        Return treeNode
+    End Function
 #End Region
+
 End Module
 
 <DirectoryRdnPrefix("CN")>
