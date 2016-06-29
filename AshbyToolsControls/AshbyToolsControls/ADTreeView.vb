@@ -7,8 +7,10 @@ Imports AshbyTools
 ''' </summary>
 Public Class ADTreeView
     Inherits System.Windows.Forms.TreeView
+
+    Dim uTree As AshbyTools.UserTree
     Public Sub loadAD(ByRef ctx As PrincipalContext)
-        Dim uTree As AshbyTools.UserTree = getUserTree(ctx)
+        uTree = getUserTree(ctx)
         Dim currentHead As TreeNode = New TreeNode(uTree.name)
         Me.Nodes.Add(currentHead)
         For Each locationNode As UserTree In uTree.children
@@ -25,5 +27,11 @@ Public Class ADTreeView
             Next
         End If
     End Sub
+
+    Public Function getUsersAt(ByVal loc As String, ctx As PrincipalContext) As List(Of UserPrincipalex)
+        uTree = getUserTree(ctx)
+        Return ADTools.findMatchingNode(loc, uTree).userList
+    End Function
+
 
 End Class
