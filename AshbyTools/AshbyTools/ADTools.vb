@@ -348,6 +348,19 @@ Public Class UserPrincipalex
         MyBase.New(context, samAccountName, password, enabled)
     End Sub
 
+    <DirectoryProperty("pager")>
+    Public Property pager() As String
+        Get
+            If ExtensionGet("pager").Length <> 1 Then
+                Return String.Empty
+            End If
+            Return DirectCast(ExtensionGet("pager")(0), String)
+        End Get
+        Set(value As String)
+            ExtensionSet("pager", value)
+        End Set
+    End Property
+
     <DirectoryProperty("extensionAttribute1")>
     Public Property extensionAttribute1() As String
         Get

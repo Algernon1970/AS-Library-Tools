@@ -4,6 +4,7 @@ Imports System.DirectoryServices.AccountManagement
 Public Class ADBrowser
     Public Event NodeSelect(ByVal path As String)
     Public Event UserSelection(ByVal ulist As List(Of UserPrincipalex))
+    Public Event UserDoubleClick(ByVal sender As Object, ByVal e As EventArgs)
 
     Public Sub loadAD(ByVal domain As String, ByVal ou As String)
         AdTreeView1.loadAD(getConnection(domain, ou))
@@ -43,4 +44,8 @@ Public Class ADBrowser
         Next
         Return users
     End Function
+
+    Private Sub UserListBox_DoubleClick(sender As Object, e As EventArgs) Handles UserListBox.DoubleClick
+        RaiseEvent UserDoubleClick(sender, e)
+    End Sub
 End Class

@@ -24,10 +24,10 @@ Partial Class ADBrowser
     Private Sub InitializeComponent()
         Me.TableLayoutPanel1 = New System.Windows.Forms.TableLayoutPanel()
         Me.ADGroupBox = New System.Windows.Forms.GroupBox()
+        Me.AdTreeView1 = New AshbyToolsControls.ADTreeView()
         Me.UserGroupBox = New System.Windows.Forms.GroupBox()
         Me.UserListBox = New System.Windows.Forms.ListBox()
         Me.ContainerLabel = New System.Windows.Forms.Label()
-        Me.AdTreeView1 = New AshbyToolsControls.ADTreeView()
         Me.TableLayoutPanel1.SuspendLayout()
         Me.ADGroupBox.SuspendLayout()
         Me.UserGroupBox.SuspendLayout()
@@ -61,6 +61,14 @@ Partial Class ADBrowser
         Me.ADGroupBox.TabStop = False
         Me.ADGroupBox.Text = "Active Directory"
         '
+        'AdTreeView1
+        '
+        Me.AdTreeView1.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.AdTreeView1.Location = New System.Drawing.Point(3, 16)
+        Me.AdTreeView1.Name = "AdTreeView1"
+        Me.AdTreeView1.Size = New System.Drawing.Size(220, 396)
+        Me.AdTreeView1.TabIndex = 0
+        '
         'UserGroupBox
         '
         Me.UserGroupBox.Controls.Add(Me.UserListBox)
@@ -90,14 +98,6 @@ Partial Class ADBrowser
         Me.ContainerLabel.Size = New System.Drawing.Size(0, 13)
         Me.ContainerLabel.TabIndex = 2
         Me.ContainerLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
-        '
-        'AdTreeView1
-        '
-        Me.AdTreeView1.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.AdTreeView1.Location = New System.Drawing.Point(3, 16)
-        Me.AdTreeView1.Name = "AdTreeView1"
-        Me.AdTreeView1.Size = New System.Drawing.Size(220, 396)
-        Me.AdTreeView1.TabIndex = 0
         '
         'ADBrowser
         '
