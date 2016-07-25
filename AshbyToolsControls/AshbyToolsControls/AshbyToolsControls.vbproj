@@ -75,6 +75,12 @@
     <Compile Include="ADBrowser.vb">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="ADSearcherForm.Designer.vb">
+      <DependentUpon>ADSearcherForm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="ADSearcherForm.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="ADTreeView.vb">
       <SubType>Component</SubType>
     </Compile>
@@ -97,6 +103,9 @@
   <ItemGroup>
     <EmbeddedResource Include="ADBrowser.resx">
       <DependentUpon>ADBrowser.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ADSearcherForm.resx">
+      <DependentUpon>ADSearcherForm.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="My Project\Resources.resx">
       <Generator>VbMyResourcesResXFileCodeGenerator</Generator>

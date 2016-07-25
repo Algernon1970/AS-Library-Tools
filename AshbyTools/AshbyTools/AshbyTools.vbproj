@@ -48,6 +48,8 @@
     <Reference Include="System.Data" />
     <Reference Include="System.DirectoryServices.AccountManagement" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
@@ -68,6 +70,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ADTools.vb" />
+    <Compile Include="DictionarySerializer.vb" />
+    <Compile Include="FileOperations.vb" />
+    <Compile Include="ListChooser.Designer.vb">
+      <DependentUpon>ListChooser.vb</DependentUpon>
+    </Compile>
+    <Compile Include="ListChooser.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Mapper.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">
       <AutoGen>True</AutoGen>
@@ -91,6 +102,9 @@
     <Compile Include="Utils.vb" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="ListChooser.resx">
+      <DependentUpon>ListChooser.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="My Project\Resources.resx">
       <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.vb</LastGenOutput>
@@ -99,10 +113,14 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="My Project\Application.myapp">
       <Generator>MyApplicationCodeGenerator</Generator>
       <LastGenOutput>Application.Designer.vb</LastGenOutput>
     </None>
+    <None Include="My Project\DataSources\System.Data.DataSet.datasource" />
     <None Include="My Project\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <CustomToolNamespace>My</CustomToolNamespace>
@@ -111,6 +129,9 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{94E38DFF-614B-4CBD-B67C-F211BB35CE8B}" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

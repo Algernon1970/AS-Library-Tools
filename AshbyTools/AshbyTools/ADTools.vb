@@ -1,15 +1,67 @@
 ﻿Imports System.DirectoryServices.AccountManagement
+Imports System.Threading
 Imports System.Windows.Forms
 
 
 Public Module ADTools
     Dim msg As New eMailMessage
-    Dim userCTX As PrincipalContext = getConnection("as.internal", usersCTXString)
+    Public userCTX As PrincipalContext = getConnection("as.internal", usersCTXString)
     Dim tutorsCTX As PrincipalContext = getConnection("as.internal", tutorsCTXString)
     Dim yearCTX As PrincipalContext = getConnection("as.internal", yearCTXString)
     Dim classCTX As PrincipalContext = getConnection("as.internal", classCTXString)
     Dim myUTree As UserTree
     Dim rflag As Boolean = False
+
+    ''' <summary>
+    ''' Wait till a newly created AD account is available to read.
+    ''' </summary>
+    ''' <param name="userdetails"></param>
+    ''' <param name="path"></param>
+    ''' <returns></returns>
+    Public Function waitTillAvailable(ByVal userdetails As UserDetails, ByVal path As String) As PrincipalContext
+        Dim myctx As PrincipalContext
+        myctx = ADTools.getConnection("as.internal", path)
+        While True
+            If ADTools.userExists(myctx, userdetails) Then
+                Thread.Sleep(2000)
+                Return myctx
+            End If
+            Thread.Sleep(250)
+        End While
+        Return Nothing
+    End Function
+
+    ''' <summary>
+    ''' Create home directory and set permissions for user.
+    ''' </summary>
+    ''' <param name="user"></param>
+    ''' <param name="path"></param>
+    ''' <param name="myctx"></param>
+    Public Sub createDirectories(ByVal user As UserDetails, ByVal path As String, ByRef myctx As PrincipalContext)
+        If myctx Is Nothing Then
+            myctx = ADTools.getConnection("as.internal", path)
+        End If
+        Dim result As Boolean = False
+        If Not FileOperations.exists(user.HomeDirectory) Then
+            FileOperations.createDirectory(user.HomeDirectory)
+
+            Dim looped As Integer = 0
+            Dim domainUserName As String = myctx.Name.Split(".")(1) & "\" & user.Username
+            For looped = 0 To 40
+                result = FileOperations.setACL(user.HomeDirectory, user.Username, False)
+                If result = False Then
+                    Thread.Sleep(250)
+                Else
+                    Exit For
+                End If
+            Next
+
+            If result = False Then
+                Throw New Exception("Failed to create directory.")
+            End If
+        End If
+
+    End Sub
 
     Public Sub setupMail(ByVal eMailFrom As String, ByVal Optional eMailto As String = "itsupport@ashbyschool.org.uk",
                          Optional ByVal emailSubject As String = "Automailed Message", Optional ByVal body As String = "Blank",
@@ -84,6 +136,20 @@ Public Module ADTools
             Dim grp As GroupPrincipal = getGroupPrincipalbyName(ctx, group)
             If Not grp.Members.Contains(ctx, IdentityType.SamAccountName, usr.SamAccountName) Then
                 grp.Members.Add(usr)
+            End If
+            grp.Save()
+        Catch ex As Exception
+
+            'no groups to add
+        End Try
+    End Sub
+
+    Public Sub removeUserFromGroup(ByVal ctx As PrincipalContext, user As String, group As String)
+        Try
+            Dim usr As DirectoryServices.AccountManagement.UserPrincipal = getUserPrincipalbyUsername(ctx, user)
+            Dim grp As GroupPrincipal = getGroupPrincipalbyName(ctx, group)
+            If grp.Members.Contains(ctx, IdentityType.SamAccountName, usr.SamAccountName) Then
+                grp.Members.Remove(usr)
             End If
             grp.Save()
         Catch ex As Exception
@@ -215,6 +281,25 @@ Public Module ADTools
         Return userlist
     End Function
 
+    Public Function getAllComputers(ByVal ctx) As List(Of ComputerPrincipal)
+        Dim computerList As New List(Of ComputerPrincipal)
+        Try
+            Dim searchComputer As ComputerPrincipal = New ComputerPrincipal(ctx)
+            Dim searcher As PrincipalSearcher = New PrincipalSearcher(searchComputer)
+
+            For Each computer As ComputerPrincipal In searcher.FindAll()
+                computerList.Add(computer)
+            Next
+            searcher.Dispose()
+            searchComputer.Dispose()
+        Catch ex As Exception
+
+        End Try
+
+
+        Return computerList
+    End Function
+
     Public Function getManagedGroups(ByVal ctx) As List(Of GroupPrincipal)
         Dim groupList As New List(Of GroupPrincipal)
         Dim searchgrp As New GroupPrincipal(ctx)
@@ -330,6 +415,18 @@ Public Module ADTools
         Next
         Return treeNode
     End Function
+
+    ''' <summary>
+    ''' Convert a path in the form as/internal/user into cn=user,dc=internal,dc=as
+    ''' </summary>
+    ''' <param name="path"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function getADPath(ByVal path As String) As String
+        Dim backPath As String() = reverseArray(path.Split(","))
+        Dim returnString As String = String.Join(",", backPath)
+        Return returnString.Substring(1)
+    End Function
 #End Region
 
 End Module
@@ -441,9 +538,9 @@ Public Class UserPrincipalex
     End Property
 
     ' Implement the overloaded search method FindByIdentity.
-    Public Shared Shadows Function FindByIdentity(context As PrincipalContext, identityValue As String) As UserPrincipal
+    Public Shared Shadows Function FindByIdentity(context As PrincipalContext, identityValue As String) As UserPrincipalex
         Try
-            Return DirectCast(FindByIdentityWithType(context, GetType(UserPrincipal), identityValue), UserPrincipal)
+            Return DirectCast(FindByIdentityWithType(context, GetType(UserPrincipalex), identityValue), UserPrincipalex)
         Catch ex As Exception
             Return Nothing
         End Try
@@ -451,9 +548,9 @@ Public Class UserPrincipalex
     End Function
 
     ' Implement the overloaded search method FindByIdentity.
-    Public Shared Shadows Function FindByIdentity(context As PrincipalContext, identityType As IdentityType, identityValue As String) As UserPrincipal
+    Public Shared Shadows Function FindByIdentity(context As PrincipalContext, identityType As IdentityType, identityValue As String) As UserPrincipalex
         Try
-            Return DirectCast(FindByIdentityWithType(context, GetType(UserPrincipal), identityType, identityValue), UserPrincipal)
+            Return DirectCast(FindByIdentityWithType(context, GetType(UserPrincipalex), identityType, identityValue), UserPrincipalex)
         Catch ex As Exception
             Return Nothing
         End Try
@@ -508,10 +605,10 @@ Public Class groupDetails
 End Class
 
 Public Enum containerType
-        dn
-        ou
-        cn
-    End Enum
+    dn
+    ou
+    cn
+End Enum
 
 Public Class UserTree
     Property type As containerType
