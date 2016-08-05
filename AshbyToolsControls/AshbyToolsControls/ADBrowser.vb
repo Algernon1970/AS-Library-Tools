@@ -89,14 +89,20 @@ Public Class ADBrowser
             End If
         Next
         allUsers = Nothing
-        Dim adsearch As New ADSearcherForm(matchedUsers)
         Dim res As String = "Cancelled"
-        If adsearch.ShowDialog() = System.Windows.Forms.DialogResult.OK Then
-            res = adsearch.getselected
+        If matchedUsers.Count > 1 Then
+            Dim adsearch As New ADSearcherForm(matchedUsers)
+
+            If adsearch.ShowDialog() = System.Windows.Forms.DialogResult.OK Then
+                res = adsearch.getselected
+            End If
+
+            adsearch.Dispose()
+            adsearch = Nothing
+        Else
+            res = matchedUsers(0).SamAccountName
         End If
 
-        adsearch.Dispose()
-        adsearch = Nothing
         FindButton.Text = "Find"
         FindButton.Enabled = True
         FindButton.Refresh()

@@ -130,7 +130,7 @@ Public Module ADTools
         End Try
     End Function
 
-    Public Sub addUserToGroup(ByVal ctx As PrincipalContext, user As String, ByVal group As String)
+    Public Function addUserToGroup(ByVal ctx As PrincipalContext, user As String, ByVal group As String) As String
         Try
             Dim usr As DirectoryServices.AccountManagement.UserPrincipal = getUserPrincipalbyUsername(ctx, user)
             Dim grp As GroupPrincipal = getGroupPrincipalbyName(ctx, group)
@@ -138,13 +138,14 @@ Public Module ADTools
                 grp.Members.Add(usr)
             End If
             grp.Save()
+            Return "ok"
         Catch ex As Exception
-
+            Return ex.Message
             'no groups to add
         End Try
-    End Sub
+    End Function
 
-    Public Sub removeUserFromGroup(ByVal ctx As PrincipalContext, user As String, group As String)
+    Public Function removeUserFromGroup(ByVal ctx As PrincipalContext, user As String, group As String) As String
         Try
             Dim usr As DirectoryServices.AccountManagement.UserPrincipal = getUserPrincipalbyUsername(ctx, user)
             Dim grp As GroupPrincipal = getGroupPrincipalbyName(ctx, group)
@@ -152,11 +153,12 @@ Public Module ADTools
                 grp.Members.Remove(usr)
             End If
             grp.Save()
+            Return "ok"
         Catch ex As Exception
-
+            Return ex.Message
             'no groups to add
         End Try
-    End Sub
+    End Function
 
     Public Function createUser(ByVal ctx As PrincipalContext, ByVal user As UserDetails) As createStatus
         'User already exist?

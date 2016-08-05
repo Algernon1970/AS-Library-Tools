@@ -84,6 +84,15 @@
     <Compile Include="ADTreeView.vb">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="AshbyListView.Designer.vb">
+      <DependentUpon>AshbyListView.vb</DependentUpon>
+    </Compile>
+    <Compile Include="AshbyListView.vb">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ColorListBox.vb">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">
       <AutoGen>True</AutoGen>
@@ -106,6 +115,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="ADSearcherForm.resx">
       <DependentUpon>ADSearcherForm.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="AshbyListView.resx">
+      <DependentUpon>AshbyListView.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="My Project\Resources.resx">
       <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
