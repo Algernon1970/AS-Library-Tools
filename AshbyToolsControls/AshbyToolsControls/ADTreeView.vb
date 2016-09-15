@@ -8,29 +8,45 @@ Imports AshbyTools
 Public Class ADTreeView
     Inherits System.Windows.Forms.TreeView
 
-    Dim uTree As AshbyTools.UserTree
-    Public Sub loadAD(ByRef ctx As PrincipalContext)
+    Dim uTree As AshbyTools.ObjectTree
+    Public Sub loadUserAD(ByRef ctx As PrincipalContext)
         uTree = getUserTree(ctx)
         Dim currentHead As TreeNode = New TreeNode(uTree.name)
         Me.Nodes.Add(currentHead)
-        For Each locationNode As UserTree In uTree.children
+        For Each locationNode As ObjectTree In uTree.children
             buildTreeView(currentHead, locationNode)
         Next
     End Sub
 
-    Private Sub buildTreeView(ByVal cHead As TreeNode, ByVal lNode As UserTree)
+    Public Sub loadGroupAD(ByRef ctx As PrincipalContext)
+        uTree = getGroupTree(ctx)
+        Dim currentHead As TreeNode = New TreeNode(uTree.name)
+        Me.Nodes.Add(currentHead)
+        For Each locationNode As ObjectTree In uTree.children
+            buildTreeView(currentHead, locationNode)
+        Next
+    End Sub
+
+    Private Sub buildTreeView(ByVal cHead As TreeNode, ByVal lNode As ObjectTree)
         Dim ncHead As TreeNode = New TreeNode(lNode.name)
         cHead.Nodes.Add(ncHead)
         If lNode.children IsNot Nothing Then
-            For Each locationNode As UserTree In lNode.children
+            For Each locationNode As ObjectTree In lNode.children
                 buildTreeView(ncHead, locationNode)
             Next
         End If
     End Sub
 
     Public Function getUsersAt(ByVal loc As String, ctx As PrincipalContext) As List(Of UserPrincipalex)
+        Dim retlist As New List(Of UserPrincipalex)
         uTree = getUserTree(ctx)
-        Return ADTools.findMatchingNode(loc, uTree).userList
+        Dim objectnodes As List(Of NodeContainer) = ADTools.findMatchingNode(loc, uTree).objectList
+        For Each node As NodeContainer In objectnodes
+            If node.type = TypeOfContainer.userex Then
+                retlist.Add(node.userex)
+            End If
+        Next
+        Return retlist
     End Function
 
 

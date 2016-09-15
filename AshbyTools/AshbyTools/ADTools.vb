@@ -9,7 +9,7 @@ Public Module ADTools
     Dim tutorsCTX As PrincipalContext = getConnection("as.internal", tutorsCTXString)
     Dim yearCTX As PrincipalContext = getConnection("as.internal", yearCTXString)
     Dim classCTX As PrincipalContext = getConnection("as.internal", classCTXString)
-    Dim myUTree As UserTree
+    Dim myUTree As ObjectTree
     Dim rflag As Boolean = False
 
     ''' <summary>
@@ -31,22 +31,14 @@ Public Module ADTools
         Return Nothing
     End Function
 
-    ''' <summary>
-    ''' Create home directory and set permissions for user.
-    ''' </summary>
-    ''' <param name="user"></param>
-    ''' <param name="path"></param>
-    ''' <param name="myctx"></param>
-    Public Sub createDirectories(ByVal user As UserDetails, ByVal path As String, ByRef myctx As PrincipalContext)
-        If myctx Is Nothing Then
-            myctx = ADTools.getConnection("as.internal", path)
-        End If
+    Public Function createDirectories(ByVal user As UserDetails, ByVal path As String, ByRef myctx As PrincipalContext) As createStatus
         Dim result As Boolean = False
         If Not FileOperations.exists(user.HomeDirectory) Then
             FileOperations.createDirectory(user.HomeDirectory)
 
             Dim looped As Integer = 0
             Dim domainUserName As String = myctx.Name.Split(".")(1) & "\" & user.Username
+
             For looped = 0 To 40
                 result = FileOperations.setACL(user.HomeDirectory, user.Username, False)
                 If result = False Then
@@ -57,11 +49,11 @@ Public Module ADTools
             Next
 
             If result = False Then
-                Throw New Exception("Failed to create directory.")
+                Return createStatus.fubar
             End If
         End If
-
-    End Sub
+        Return createStatus.ok
+    End Function
 
     Public Sub setupMail(ByVal eMailFrom As String, ByVal Optional eMailto As String = "itsupport@ashbyschool.org.uk",
                          Optional ByVal emailSubject As String = "Automailed Message", Optional ByVal body As String = "Blank",
@@ -204,22 +196,23 @@ Public Module ADTools
             usr.UserCannotChangePassword = False
         End If
 
-        usr.ProfilePath = "\\" & user.ProfilePath
+        usr.ProfilePath = If(user.ProfilePath.StartsWith("\\"), user.ProfilePath, "\\" & user.ProfilePath)
         usr.HomeDrive = user.HomeDrive
-        usr.HomeDirectory = "\\" & user.HomeDirectory
-        usr.SetPassword(user.Password)
-        usr.Description = user.Description
-        usr.MiddleName = user.MiddleName
-        usr.EmployeeId = user.BromcomID
+        usr.HomeDirectory = If(user.HomeDirectory.StartsWith("\\"), user.HomeDirectory, "\\" & user.HomeDirectory)
+        usr.SetPassword(If(user.Password = "", "password", user.Password))
+
+        usr.Description = If(user.Description = "", " ", user.Description)
+        usr.MiddleName = If(user.MiddleName = "", " ", user.MiddleName)
+        usr.EmployeeId = If(user.BromcomID = "", "0", user.BromcomID)
 
         usr.UserPrincipalName = user.Username & emailDomain
         usr.Save()
         usr.Dispose()
     End Sub
 
-    Public Function getUserPrincipalexbyUsername(ByVal ctx As PrincipalContext, userName As String) As UserPrincipal
+    Public Function getUserPrincipalexbyUsername(ByVal ctx As PrincipalContext, userName As String) As UserPrincipalex
         Try
-            Dim usr As UserPrincipal = UserPrincipal.FindByIdentity(ctx, userName)
+            Dim usr As UserPrincipalex = UserPrincipalex.FindByIdentity(ctx, userName)
             Return usr
         Catch ex As Exception
             Return Nothing
@@ -348,68 +341,97 @@ Public Module ADTools
     End Function
 
 #Region "ADTree"
-    Public Function getUserTree(ctx As PrincipalContext) As UserTree
-        Dim uTree As New UserTree
+    Public Function getUserTree(ctx As PrincipalContext) As ObjectTree
+        Dim uTree As New ObjectTree
         uTree.name = "DC=internal"
         uTree.type = containerType.dn
 
         Dim uList As List(Of UserPrincipalex) = getAllUsers(ctx)
         For Each user As UserPrincipalex In uList
-            addToTree(user, uTree)
+            addUserToTree(user, uTree)
         Next
         myUTree = uTree
         Return uTree
     End Function
 
-    Public Sub addToTree(ByVal user As UserPrincipalex, ByVal uTree As UserTree)
-        'get treeNode from user's DistingushedName
-        Dim locations As String() = reverseArray(user.DistinguishedName.Split(","))
-        Dim treeNode As UserTree = getReleventNode(locations, uTree)
-        If treeNode.userList Is Nothing Then
-            treeNode.userList = New List(Of UserPrincipalex)
-        End If
-        treeNode.userList.Add(user)
-
-    End Sub
-
-    Public Function getReleventNode(ByVal locations As String(), ByVal cNode As UserTree) As UserTree
-        Dim userNode As UserTree = cNode
-        For i As Integer = 2 To locations.Count - 2
-            userNode = findMatchingNode(locations(i), userNode)
+    Public Function getGroupTree(ctx As PrincipalContext) As ObjectTree
+        Dim uTree As New ObjectTree
+        uTree.name = "DC=internal"
+        uTree.type = containerType.dn
+        Dim uList As List(Of GroupPrincipal) = getManagedGroups(ctx)
+        For Each grp As GroupPrincipal In uList
+            addGroupToTree(grp, uTree)
         Next
-        Return userNode
+        myUTree = uTree
+        Return uTree
     End Function
 
-    Public Function findMatchingNode(ByVal locationName As String, cNode As UserTree) As UserTree
+    Public Sub addUserToTree(ByVal user As UserPrincipalex, ByVal uTree As ObjectTree)
+        'get treeNode from user's DistingushedName
+        Dim locations As String() = reverseArray(user.DistinguishedName.Split(","))
+        Dim treeNode As ObjectTree = getReleventNode(locations, uTree)
+        If treeNode.objectList Is Nothing Then
+            treeNode.objectList = New List(Of NodeContainer)
+        End If
+        Dim n As New NodeContainer
+        n.type = TypeOfContainer.userex
+        n.userex = user
+        n.user = Nothing
+        n.group = Nothing
+        treeNode.objectList.Add(n)
+    End Sub
+    Public Sub addGroupToTree(ByVal grp As GroupPrincipal, ByVal uTree As ObjectTree)
+        Dim locations As String() = reverseArray(grp.DistinguishedName.Split(","))
+        Dim treeNode As ObjectTree = getReleventNode(locations, uTree)
+        If treeNode.objectList Is Nothing Then
+            treeNode.objectList = New List(Of NodeContainer)
+        End If
+        Dim n As New NodeContainer
+        n.type = TypeOfContainer.group
+        n.group = grp
+        n.user = Nothing
+        n.group = Nothing
+        treeNode.objectList.Add(n)
+    End Sub
+
+    Public Function getReleventNode(ByVal locations As String(), ByVal cNode As ObjectTree) As ObjectTree
+        Dim ObjectNode As ObjectTree = cNode
+        For i As Integer = 2 To locations.Count - 2
+            ObjectNode = findMatchingNode(locations(i), ObjectNode)
+        Next
+        Return ObjectNode
+    End Function
+
+    Public Function findMatchingNode(ByVal locationName As String, cNode As ObjectTree) As ObjectTree
         If cNode.children IsNot Nothing Then
-            For Each node As UserTree In cNode.children
+            For Each node As ObjectTree In cNode.children
                 If node.name.Equals(locationName) Then
                     Return node
                 End If
             Next
         Else
-            cNode.children = New List(Of UserTree)
+            cNode.children = New List(Of ObjectTree)
         End If
 
-        Dim newNode As UserTree = New UserTree
+        Dim newNode As ObjectTree = New ObjectTree
         newNode.name = locationName
         cNode.children.Add(newNode)
         Return newNode
     End Function
 
-    Public Function getNodeByPath(ByVal path As String) As UserTree
+    Public Function getNodeByPath(ByVal path As String) As ObjectTree
         rflag = False
         Return (getNodeByPath(path, myUTree))
     End Function
 
-    Private Function getNodeByPath(ByVal path As String, treeNode As UserTree) As UserTree
+    Private Function getNodeByPath(ByVal path As String, treeNode As ObjectTree) As ObjectTree
         If rflag Then Return treeNode
         If treeNode.children Is Nothing Then
             rflag = True
             Return treeNode
         End If
         For Each pathElement As String In path.Split(",")
-            For Each childnode As UserTree In treeNode.children
+            For Each childnode As ObjectTree In treeNode.children
                 If childnode.name.Equals(pathElement) Then
                     Return getNodeByPath(path.Replace(pathElement & ",", ""), childnode)
                 End If
@@ -558,6 +580,20 @@ Public Class UserPrincipalex
         End Try
 
     End Function
+
+    Public Function waitTillAvailable(ByVal domain As String, ByVal userdetails As UserDetails, ByVal path As String) As PrincipalContext
+        Dim myctx As PrincipalContext
+
+        myctx = ADTools.getConnection(domain, path)
+        For loopcnt As Integer = 1 To 250
+            If ADTools.userExists(myctx, userdetails) Then
+                Thread.Sleep(2000)
+                Return myctx
+            End If
+            Thread.Sleep(250)
+        Next
+        Return Nothing
+    End Function
 End Class
 
 Public Class UserDetails
@@ -612,10 +648,23 @@ Public Enum containerType
     cn
 End Enum
 
-Public Class UserTree
+Public Class ObjectTree
     Property type As containerType
     Property name As String
-    Property parent As UserTree
-    Property children As List(Of UserTree)
-    Property userList As List(Of UserPrincipalex)
+    Property parent As ObjectTree
+    Property children As List(Of ObjectTree)
+    Property objectList As List(Of NodeContainer)
 End Class
+
+Public Enum TypeOfContainer
+    user
+    userex
+    group
+End Enum
+
+Public Structure NodeContainer
+    Public type As TypeOfContainer
+    Public userex As UserPrincipalex
+    Public user As UserPrincipal
+    Public group As GroupPrincipal
+End Structure

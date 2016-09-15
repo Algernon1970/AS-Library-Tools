@@ -8,8 +8,12 @@ Public Class ADBrowser
     Public Event UserSelection(ByVal ulist As List(Of UserPrincipalex))
     Public Event UserDoubleClick(ByVal sender As Object, ByVal e As EventArgs)
 
-    Public Sub loadAD(ByVal domain As String, ByVal ou As String)
-        AdTreeView1.loadAD(getConnection(domain, ou))
+    Public Sub loadUserAD(ByVal domain As String, ByVal ou As String)
+        AdTreeView1.loadUserAD(getConnection(domain, ou))
+    End Sub
+
+    Public Sub loadGroupAD(ByVal domain As String, ou As String)
+        AdTreeView1.loadGroupAD(getConnection(domain, ou))
     End Sub
 
     Private Sub AdTreeView1_NodeMouseClick(sender As Object, e As System.Windows.Forms.TreeNodeMouseClickEventArgs) Handles AdTreeView1.NodeMouseClick
@@ -18,9 +22,21 @@ Public Class ADBrowser
         DisplayUserList(path)
     End Sub
 
+    Private Function getUsersFromList(ByRef nodelist As List(Of NodeContainer)) As List(Of UserPrincipalex)
+        Dim retlist As New List(Of UserPrincipalex)
+        If IsNothing(nodelist) Then Return retlist
+
+        For Each node As NodeContainer In nodelist
+            If node.type = TypeOfContainer.userex Then
+                retlist.Add(node.userex)
+            End If
+        Next
+        Return retlist
+    End Function
+
     Private Sub DisplayUserList(path As String)
         ContainerLabel.Text = path
-        Dim listit As List(Of UserPrincipalex) = getNodeByPath(path).userList
+        Dim listit As List(Of UserPrincipalex) = getUsersFromList(getNodeByPath(path).objectList)
         UserListBox.Items.Clear()
         Try
             UserListBox.Sorted = True
@@ -57,6 +73,16 @@ Public Class ADBrowser
     End Sub
 
     Private Sub FindButton_Click(sender As Object, e As EventArgs) Handles FindButton.Click
+        doFind()
+    End Sub
+
+    Private Sub FindUserBox_KeyDown(sender As Object, e As KeyEventArgs) Handles FindUserBox.KeyDown
+        If e.KeyCode = Keys.Enter Then
+            doFind()
+        End If
+    End Sub
+
+    Private Sub doFind()
         FindButton.Text = "WAIT"
         FindButton.Enabled = False
         FindButton.Refresh()
@@ -90,6 +116,13 @@ Public Class ADBrowser
         Next
         allUsers = Nothing
         Dim res As String = "Cancelled"
+        If matchedUsers.Count = 0 Then
+            FindUserBox.Text = ""
+            FindButton.Text = "Find"
+            FindButton.Enabled = True
+            FindButton.Refresh()
+            Return
+        End If
         If matchedUsers.Count > 1 Then
             Dim adsearch As New ADSearcherForm(matchedUsers)
 

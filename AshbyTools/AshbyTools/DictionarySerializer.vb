@@ -1,7 +1,7 @@
 ﻿Imports System
 Imports System.IO
 Imports System.Collections
-
+<Obsolete>
 Public Module DictionarySerializer
     Public Sub saveDict(ByVal fname As String, ByVal ext As String, ByRef dict As Dictionary(Of String, String))
         Dim fs As IO.FileStream = New IO.FileStream(String.Format("{0}{1}", fname, ext), IO.FileMode.OpenOrCreate)

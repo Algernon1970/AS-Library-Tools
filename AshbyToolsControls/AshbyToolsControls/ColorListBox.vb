@@ -86,6 +86,15 @@ Public Class ColorListBox
 
 #Region " Methods "
 
+    Public Overloads Function FindString(ByVal str As String)
+        For count As Integer = 0 To Items.Count - 1
+            If Items(count).Text.ToUpper.StartsWith(str.ToUpper) Then
+                Return count
+            End If
+        Next
+        Return -1
+    End Function
+
     Protected Overrides Sub OnDrawItem(ByVal e As System.Windows.Forms.DrawItemEventArgs)
         MyBase.OnDrawItem(e)
 

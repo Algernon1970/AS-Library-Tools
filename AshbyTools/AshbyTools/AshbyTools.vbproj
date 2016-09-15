@@ -71,6 +71,7 @@
   <ItemGroup>
     <Compile Include="ADTools.vb" />
     <Compile Include="DictionarySerializer.vb" />
+    <Compile Include="DictionaryTools.vb" />
     <Compile Include="FileOperations.vb" />
     <Compile Include="ListChooser.Designer.vb">
       <DependentUpon>ListChooser.vb</DependentUpon>
@@ -79,6 +80,7 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Mapper.vb" />
+    <Compile Include="MISReader.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">
       <AutoGen>True</AutoGen>
@@ -98,6 +100,11 @@
     <Compile Include="ProtectSettings.vb" />
     <Compile Include="SchoolSettings.vb" />
     <Compile Include="Sendmail.vb" />
+    <Compile Include="Service References\SoapReader\Reference.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
     <Compile Include="Simple3Des.vb" />
     <Compile Include="Utils.vb" />
   </ItemGroup>
@@ -126,12 +133,31 @@
       <CustomToolNamespace>My</CustomToolNamespace>
       <LastGenOutput>Settings.Designer.vb</LastGenOutput>
     </None>
+    <None Include="Service References\SoapReader\TPReadOnlyDataService.wsdl" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{94E38DFF-614B-4CBD-B67C-F211BB35CE8B}" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadataStorage Include="Service References\SoapReader\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\SoapReader\TPReadOnlyDataService.disco" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\SoapReader\configuration91.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\SoapReader\configuration.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\SoapReader\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.vb</LastGenOutput>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
