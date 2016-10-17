@@ -124,9 +124,9 @@ Public Module ADTools
 
     Public Function addUserToGroup(ByVal ctx As PrincipalContext, user As String, ByVal group As String) As String
         Try
-            Dim usr As DirectoryServices.AccountManagement.UserPrincipal = getUserPrincipalbyUsername(ctx, user)
+            Dim usr As DirectoryServices.AccountManagement.UserPrincipal = getUserPrincipalbyUsername(userCTX, user)
             Dim grp As GroupPrincipal = getGroupPrincipalbyName(ctx, group)
-            If Not grp.Members.Contains(ctx, IdentityType.SamAccountName, usr.SamAccountName) Then
+            If Not grp.Members.Contains(usr) Then
                 grp.Members.Add(usr)
             End If
             grp.Save()
