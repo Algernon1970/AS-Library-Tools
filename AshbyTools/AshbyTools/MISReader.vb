@@ -12,6 +12,12 @@ Public Module MISReader
     Public futureFilter As String = "StartDate > GETDATE()"
     Public leaversFilter As String = "EndDate < GETDATE()"
 
+    ''' <summary>
+    ''' Get a Datatable from Bromcom based on Tablename and Filter
+    ''' </summary>
+    ''' <param name="tablename">The name of a table to return</param>
+    ''' <param name="filter">an SQL filter to limit the records in the table.</param>
+    ''' <returns>The datatable containing the data requested by the filter.</returns>
     Public Function getTable(ByVal tablename As String, ByVal filter As String) As DataTable
         Try
             Dim getTable_Table As DataTable
@@ -26,6 +32,12 @@ Public Module MISReader
 
     End Function
 
+    ''' <summary>
+    ''' Get a UserInfo object representing a member of staff from the Staff Table in Bromcom
+    ''' If there is more than 1 user matching the given filter, prompt the user for the correct user.
+    ''' </summary>
+    ''' <param name="filter">SQL command to find the requested users.</param>
+    ''' <returns>A Userinfo object containg the bromcom information for a specific user.</returns>
     Public Function getStaffByFilter(ByVal filter As String) As UserInfo
         Dim user As UserInfo
         Dim drs As DataRow() = getTable("Staff", filter).Select()
@@ -50,6 +62,12 @@ Public Module MISReader
         Return user
     End Function
 
+    ''' <summary>
+    ''' Get a UserInfo object representing a member of Student from the Student Table in Bromcom
+    ''' If there is more than 1 user matching the given filter, prompt the user for the correct user.
+    ''' </summary>
+    ''' <param name="filter">SQL command to find the requested users.</param>
+    ''' <returns>A Userinfo object containg the bromcom information for a specific user.</returns>
     Public Function getStudentByFilter(ByVal filter As String) As UserInfo
         Dim user As UserInfo
         Dim drs As DataRow() = getTable("Students", filter).Select()
@@ -74,13 +92,24 @@ Public Module MISReader
         Return user
     End Function
 
+    ''' <summary>
+    ''' Get a UserInfo object for a specified Student
+    ''' </summary>
+    ''' <param name="id">The Bromcom ID of the user.  (unique)</param>
+    ''' <returns>Userinfo object representing the student</returns>
     Public Function getStudentByID(ByVal id As String) As UserInfo
         Return getStudentByFilter(String.Format("StudentID like '{0}'", id))
     End Function
 
+    ''' <summary>
+    ''' Get a UserInfo object for a specified Staff member
+    ''' </summary>
+    ''' <param name="id">The Bromcom ID of the user.  (unique)</param>
+    ''' <returns>Userinfo object representing the Staff member</returns>
     Public Function getStaffByID(ByVal id As String) As UserInfo
         Return getStaffByFilter(String.Format("StaffID like '{0}'", id))
     End Function
+
 
     Public Function MISLookup(ByVal filter As String, ou As ouname) As UserInfo
         Dim uinfo As UserInfo
@@ -221,6 +250,11 @@ Public Module MISReader
         Return subjectList
     End Function
 
+    ''' <summary>
+    ''' Remove illegal characters from Bromcom Groups, so they can be used as AD Groups.
+    ''' </summary>
+    ''' <param name="name">The name of the group</param>
+    ''' <returns>A Sanitized version of the group name</returns>
     Public Function sanitizeGroupName(ByRef name As String) As String
         If name Is Nothing Then Return "None"
         If name.Contains("&") Then
