@@ -7,10 +7,16 @@ Public Module MISReader
     Dim soapUser As String = "petessoaptest"
     Dim soapPass As String = "purple"
 
+    Dim studentInfoTable As DataTable
+
     Public currentStudentsFilter As String = "GETDATE() BETWEEN StartDate AND ISNULL(EndDate, GETDATE())"
     Public currentStaffFilter As String = "GETDATE() BETWEEN StartDate AND ISNULL(EndDate, GETDATE())"
     Public futureFilter As String = "StartDate > GETDATE()"
     Public leaversFilter As String = "EndDate < GETDATE()"
+
+    Public Sub dropStudentInfoTable()
+        studentInfoTable = Nothing
+    End Sub
 
     ''' <summary>
     ''' Get a Datatable from Bromcom based on Tablename and Filter
@@ -74,6 +80,9 @@ Public Module MISReader
         If drs.Count = 0 Then
             Return Nothing
         End If
+        If drs.Count = 1 Then
+            Return getStudentInfo(drs(0).Field(Of Integer)("studentid"))
+        End If
         Dim namelist As New List(Of String)
         Dim displayline As String
         For Each row As DataRow In drs
@@ -109,7 +118,6 @@ Public Module MISReader
     Public Function getStaffByID(ByVal id As String) As UserInfo
         Return getStaffByFilter(String.Format("StaffID like '{0}'", id))
     End Function
-
 
     Public Function MISLookup(ByVal filter As String, ou As ouname) As UserInfo
         Dim uinfo As UserInfo
@@ -160,6 +168,7 @@ Public Module MISReader
     Public Function getStudentInfo(name As String) As UserInfo
         Dim drs As DataRow() = getTable("Students", String.Format("StudentID like '{0}'", name.Split(vbTab)(0))).Select()
         Dim user As New UserInfo
+        user.UPN = drs(0).Field(Of String)("UPN")
         user.forename = drs(0).Field(Of String)("Firstname")
         user.surname = drs(0).Field(Of String)("LastName")
         user.middlename = drs(0).Field(Of String)("Middlename")
@@ -209,6 +218,114 @@ Public Module MISReader
             classList.Add(cRow(0).Field(Of String)("CollectionName"))
         Next
         Return classList
+    End Function
+
+    Private Function getStudentRows(ByVal sid As String) As DataRow()
+        Dim dt As DataRow()
+        If IsNothing(sid) Or sid = 0 Then Return Nothing
+
+        If IsNothing(studentInfoTable) Then
+            studentInfoTable = getStudentInfoTables()
+        End If
+        dt = studentInfoTable.Select(String.Format("studentid like '{0}'", sid))
+        Return dt
+    End Function
+
+    Public Function getStudentObject(ByVal sid As String) As studentObject
+        Dim drs As DataRow() = getStudentRows(sid)
+        Dim so As New studentObject
+        If IsNothing(drs) Then
+            so.userInfo.id = sid
+            so.userInfo.forename = "Not"
+            so.userInfo.surname = "Found"
+        Else
+            If drs.Length = 0 Then
+                so.userInfo.id = sid
+                so.userInfo.forename = "Not"
+                so.userInfo.surname = "Found"
+            Else
+                so.userInfo.id = sid
+                so.userInfo.forename = drs(0).Field(Of String)("forename")
+                so.userInfo.surname = drs(0).Field(Of String)("surname")
+                'so.userInfo.middlename = drs(0).Field(Of String)("middlename")
+                'so.userInfo.startDate = drs(0).Field(Of String)("startdate")
+                'so.userInfo.endDate = drs(0).Field(Of String)("enddate")
+            End If
+            For Each row As DataRow In drs
+                so.classlist.Add(row.Field(Of String)("classname"))
+            Next
+        End If
+
+        Return so
+    End Function
+
+
+    Private Function getStudentInfoTables() As DataTable
+        Dim tempTable As DataTable
+        tempTable = getTable("Students", currentStudentsFilter)
+        tempTable.TableName = "currentStudents"
+        bromcomdata.Tables.Add(tempTable)
+
+        tempTable = getTable("SubjectClasses", currentStudentsFilter)
+        tempTable.TableName = "SubjectClasses"
+        bromcomdata.Tables.Add(tempTable)
+
+        tempTable = getTable("CollectionAssociates", currentStudentsFilter)
+        tempTable.TableName = "CollectionAssociates"
+        bromcomdata.Tables.Add(tempTable)
+
+        tempTable = getTable("VLEUsers", "")
+        tempTable.TableName = "VleUsers"
+        bromcomdata.Tables.Add(tempTable)
+
+
+        Dim table As DataTable
+        Dim students As DataTable = bromcomdata.Tables("CurrentStudents")
+        Dim classes As DataTable = bromcomdata.Tables("SubjectClasses")
+        Dim collection As DataTable = bromcomdata.Tables("CollectionAssociates")
+        Dim query As IEnumerable = From link In collection
+                                   Join student In students
+                       On link.Field(Of Integer)("PersonID") Equals student.Field(Of Integer)("StudentID")
+                                   Join classDetail In classes
+                       On link.Field(Of Integer)("CollectionID") Equals classDetail.Field(Of Integer)("ClassID")
+                                   Select New With {.forename = student.Field(Of String)("PreferredFirstName"),
+                                        .classname = classDetail.Field(Of String)("ClassDescription"),
+                                        .surname = student.Field(Of String)("PreferredLastName"),
+                                        .studentID = "" & student.Field(Of Integer)("StudentID"),
+                                        .admission = student.Field(Of String)("AdmissionNumber"),
+                                        .tutor = student.Field(Of String)("TutorGroup"),
+                                        .subject = classDetail.Field(Of String)("SubjectDescription"),
+                                        .yearGroup = student.Field(Of String)("YearGroup"),
+                                        .vleuser = student.Field(Of String)("ChronologicalYearGroup")
+                                       }
+        table = convertToTable(query)
+        Return table
+    End Function
+
+    Private Function convertToTable(ByVal info As IEnumerable) As DataTable
+        Dim table As New DataTable("TempTable")
+        Dim row As DataRow
+        Dim columns() = {"AdmissionNo", "StudentID", "Forename", "Surname", "ClassName", "Subject", "TutorGroup", "YearGroup", "VleUser"}
+        For Each colName As String In columns
+            table.Columns.Add(colName)
+        Next
+
+        For Each entry In info
+            row = table.NewRow()
+            row("Forename") = entry.forename
+            row("Surname") = entry.surname
+            row("AdmissionNo") = entry.admission
+            row("StudentID") = entry.studentID
+            row("ClassName") = entry.classname
+            row("Subject") = entry.subject
+            row("TutorGroup") = entry.tutor
+            row("YearGroup") = entry.yearGroup
+            row("VleUser") = entry.vleuser
+            table.Rows.Add(row)
+        Next
+        info = Nothing
+        row = Nothing
+        Return table
     End Function
 
     Public Function getSubjectFromClass(ByVal className As String) As String
@@ -274,6 +391,7 @@ Public Module MISReader
         Public id As String
         Public startDate As Date
         Public endDate As Date
+        Public UPN As String
     End Structure
 End Module
 
@@ -281,6 +399,11 @@ Public Enum ouname
     Staff
     Students
 End Enum
+
+Public Class studentObject
+    Public userInfo As UserInfo
+    Public classlist As New List(Of String)
+End Class
 
 <Serializable()>
 Public Class MISException : Inherits System.Exception

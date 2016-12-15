@@ -37,10 +37,10 @@ Public Module ADTools
             FileOperations.createDirectory(user.HomeDirectory)
 
             Dim looped As Integer = 0
-            Dim domainUserName As String = myctx.Name.Split(".")(1) & "\" & user.Username
+            Dim domainUserName As String = myctx.Name.Split(".")(0) & "\" & user.Username
 
             For looped = 0 To 40
-                result = FileOperations.setACL(user.HomeDirectory, user.Username, False)
+                result = FileOperations.setACL(user.HomeDirectory, domainUserName, False)
                 If result = False Then
                     Thread.Sleep(250)
                 Else
@@ -99,8 +99,8 @@ Public Module ADTools
         searcher.Dispose()
         If userList.Count > 1 Then
             Dim str As String = "Too many users with same id number - " & admission & vbCrLf
-            For Each user In userList
-                str = String.Format("{0}{1}{2}", str, vbCrLf, user.SamAccountName)
+            For Each lusr In userList
+                str = String.Format("{0}{1}{2}", str, vbCrLf, lusr.SamAccountName)
             Next
             Dim msg As New eMailMessage
             msg.body = str
@@ -206,6 +206,10 @@ Public Module ADTools
         usr.EmployeeId = If(user.BromcomID = "", "0", user.BromcomID)
 
         usr.UserPrincipalName = user.Username & emailDomain
+
+        'email enable test
+        usr.EmailAddress = usr.UserPrincipalName
+
         usr.Save()
         usr.Dispose()
     End Sub
@@ -252,8 +256,8 @@ Public Module ADTools
         searcher.Dispose()
         If userList.Count > 1 Then
             Dim str As String = "Too many users with same admin number - " & admission & vbCrLf
-            For Each user In userList
-                str = String.Format("{0}{1}{2}", str, vbCrLf, user.SamAccountName)
+            For Each pleb In userList
+                str = String.Format("{0}{1}{2}", str, vbCrLf, pleb.SamAccountName)
             Next
             Sendmail.sendmail(msg)
             Return Nothing
