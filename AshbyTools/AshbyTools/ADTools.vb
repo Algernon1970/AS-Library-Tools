@@ -6,9 +6,11 @@ Imports System.Windows.Forms
 Public Module ADTools
     Dim msg As New eMailMessage
     Public userCTX As PrincipalContext = getConnection("as.internal", usersCTXString)
-    Dim tutorsCTX As PrincipalContext = getConnection("as.internal", tutorsCTXString)
-    Dim yearCTX As PrincipalContext = getConnection("as.internal", yearCTXString)
-    Dim classCTX As PrincipalContext = getConnection("as.internal", classCTXString)
+    Public tutorsCTX As PrincipalContext = getConnection("as.internal", tutorsCTXString)
+    Public yearCTX As PrincipalContext = getConnection("as.internal", yearCTXString)
+    Public classCTX As PrincipalContext = getConnection("as.internal", classCTXString)
+    Public groupsCTX As PrincipalContext = getConnection("as.internal", groupsCTXString)
+    Public staffGroupsCTX As PrincipalContext = getConnection("as.internal", staffGroupsCTXString)
     Dim myUTree As ObjectTree
     Dim rflag As Boolean = False
 
@@ -33,6 +35,9 @@ Public Module ADTools
 
     Public Function createDirectories(ByVal user As UserDetails, ByVal path As String, ByRef myctx As PrincipalContext) As createStatus
         Dim result As Boolean = False
+        If user.HomeDirectory.ToLower.StartsWith("svr") Then
+            user.HomeDirectory = String.Format("\\{0}", user.HomeDirectory)
+        End If
         If Not FileOperations.exists(user.HomeDirectory) Then
             FileOperations.createDirectory(user.HomeDirectory)
 
@@ -299,6 +304,16 @@ Public Module ADTools
         Return computerList
     End Function
 
+    Public Function getGroupsByUser(ByVal id As String) As List(Of String)
+        Dim grps As New List(Of String)
+        Dim usr As UserPrincipal = getUserPrincipalByID(userCTX, id)
+        Dim usrGrps As PrincipalSearchResult(Of Principal) = usr.GetGroups()
+        For Each grp As Principal In usrGrps
+            grps.Add(grp.Name)
+        Next
+        Return grps
+    End Function
+
     Public Function getManagedGroups(ByVal ctx) As List(Of GroupPrincipal)
         Dim groupList As New List(Of GroupPrincipal)
         Dim searchgrp As New GroupPrincipal(ctx)
@@ -307,6 +322,24 @@ Public Module ADTools
             groupList.Add(grp)
         Next
         Return groupList
+    End Function
+
+    Public Function getManagedGroupNames() As List(Of String)
+        Dim grpNames As New List(Of String)
+        Dim grps As List(Of GroupPrincipal) = getManagedGroups(groupsCTX)
+        For Each grp In grps
+            grpNames.Add(grp.Name)
+        Next
+        Return grpNames
+    End Function
+
+    Public Function getStaffGroupNames() As List(Of String)
+        Dim grpNames As New List(Of String)
+        Dim grps As List(Of GroupPrincipal) = getManagedGroups(staffGroupsCTX)
+        For Each grp In grps
+            grpNames.Add(grp.Name)
+        Next
+        Return grpNames
     End Function
 
     Public Function createGroup(ByVal ctx As PrincipalContext, ByVal groupName As String) As GroupPrincipal
@@ -342,6 +375,39 @@ Public Module ADTools
         Catch ex As Exception
             Return Nothing
         End Try
+    End Function
+
+
+    ''' <summary>
+    ''' Is the name a user?
+    ''' </summary>
+    ''' <param name="name">is this name a samAccountName</param>
+    ''' <returns>true if name = user, false if not.</returns>
+    Public Function isUser(ByVal name As String) As Boolean
+        Dim myctx As PrincipalContext = ADTools.getConnection(SchoolSettings.domain, SchoolSettings.usersCTXString)
+        If IsNothing(UserPrincipal.FindByIdentity(myctx, name)) Then
+            myctx.Dispose()
+            Return False
+        Else
+            myctx.Dispose()
+            Return True
+        End If
+    End Function
+
+    Public Function getGroupMembers(ByVal name As String) As List(Of String)
+        Dim mylist As New List(Of String)
+        Dim myctx As PrincipalContext = ADTools.getConnection(SchoolSettings.domain, SchoolSettings.groupsCTXString)
+        Dim theGroup As GroupPrincipal = getGroup(myctx, name)
+        Dim members As PrincipalCollection = theGroup.Members
+        For Each member As Principal In members
+            mylist.Add(member.Name)
+            'If isUser(member.Name) Then
+            '    mylist.Add(member.Name)
+            '    'Else
+            '    '    mylist = mylist.Concat(getGroupMembers(member.Name))
+            'End If
+        Next
+        Return mylist
     End Function
 
 #Region "ADTree"

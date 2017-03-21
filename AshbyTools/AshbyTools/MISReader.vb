@@ -1,7 +1,7 @@
 ﻿Imports System.Windows.Forms
 
 Public Module MISReader
-    Dim bromcomReader As Soapreader.TPReadOnlyDataServiceSoapClient = New SoapReader.TPReadOnlyDataServiceSoapClient()
+    Dim bromcomReader As SoapReader.TPReadOnlyDataServiceSoapClient = New SoapReader.TPReadOnlyDataServiceSoapClient()
 
     Dim bromcomdata As New DataSet
     Dim soapUser As String = "petessoaptest"
@@ -189,7 +189,7 @@ Public Module MISReader
     End Function
 
     Public Function getStaffTutorGroup(ByVal staffID As String) As String
-        Dim ceFilter As String = String.Format("staffid like '{0}' and (CollectionRoleTypeDescription like 'Main Tutor' or CollectionRoleTypeDescription like 'Additional Tutor') and enddate is null", staffID)
+        Dim ceFilter As String = String.Format("staffid like '{0}' and (CollectionRoleTypeDescription like 'Main Tutor' or CollectionRoleTypeDescription like 'Additional Tutor' or CollectionRoleTypeDescription like 'Head of House') and enddate is null", staffID)
         Dim CET As DataTable = getTable("CollectionExecutives", ceFilter)
         Dim cidr As DataRow() = CET.Select()
         If IsNothing(cidr) Then
@@ -205,6 +205,19 @@ Public Module MISReader
             Return String.Format("{0}", cRow(0).Field(Of String)("CollectionName"))
         End If
 
+    End Function
+
+    Public Function getHouseFromGroup(ByRef hs As String) As String
+        If hs.ToLower.StartsWith("got") Then Return "Undefined"
+        If hs.ToLower.StartsWith("a") Then Return "Ashe"
+        If hs.ToLower.StartsWith("b") Then Return "Bullen"
+        If hs.ToLower.StartsWith("c") Then Return "Crewe"
+        If hs.ToLower.StartsWith("e") Then Return "Erdington"
+        If hs.ToLower.StartsWith("f") Then Return "Ferrers"
+        If hs.ToLower.StartsWith("g") Then Return "Gylby"
+        If hs.ToLower.StartsWith("h") Then Return "Hastings"
+        If hs.ToLower.StartsWith("l") Then Return "Loudoun"
+        Return "NONE"
     End Function
 
     Public Function getStaffClassList(ByVal staffID As String) As List(Of String)
