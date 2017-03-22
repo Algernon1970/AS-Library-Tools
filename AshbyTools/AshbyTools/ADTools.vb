@@ -20,7 +20,7 @@ Public Module ADTools
     ''' <param name="userdetails"></param>
     ''' <param name="path"></param>
     ''' <returns></returns>
-    Public Function waitTillAvailable(ByVal userdetails As UserDetails, ByVal path As String) As PrincipalContext
+    Public Function waitTillAvailable(ByRef userdetails As UserDetails, ByRef path As String) As PrincipalContext
         Dim myctx As PrincipalContext
         myctx = ADTools.getConnection("as.internal", path)
         While True
@@ -33,7 +33,7 @@ Public Module ADTools
         Return Nothing
     End Function
 
-    Public Function createDirectories(ByVal user As UserDetails, ByVal path As String, ByRef myctx As PrincipalContext) As createStatus
+    Public Function createDirectories(ByRef user As UserDetails, ByRef path As String, ByRef myctx As PrincipalContext) As createStatus
         Dim result As Boolean = False
         If user.HomeDirectory.ToLower.StartsWith("svr") Then
             user.HomeDirectory = String.Format("\\{0}", user.HomeDirectory)
@@ -60,9 +60,9 @@ Public Module ADTools
         Return createStatus.ok
     End Function
 
-    Public Sub setupMail(ByVal eMailFrom As String, ByVal Optional eMailto As String = "itsupport@ashbyschool.org.uk",
-                         Optional ByVal emailSubject As String = "Automailed Message", Optional ByVal body As String = "Blank",
-                         Optional ByVal ishtml As Boolean = False)
+    Public Sub setupMail(ByRef eMailFrom As String, ByRef Optional eMailto As String = "itsupport@ashbyschool.org.uk",
+                         Optional ByRef emailSubject As String = "Automailed Message", Optional ByRef body As String = "Blank",
+                         Optional ByRef ishtml As Boolean = False)
         msg.mailfrom = eMailFrom
         msg.mailto = eMailto
         msg.subject = emailSubject
@@ -70,21 +70,22 @@ Public Module ADTools
         msg.body = body
     End Sub
 
-    Public Function getConnection(ByVal domain As String, ByVal OU As String) As PrincipalContext
+    Public Function getConnection(ByRef domain As String, ByRef OU As String) As PrincipalContext
         Return New PrincipalContext(ContextType.Domain, domain, OU, adUser, adPass)
     End Function
 
-    Public Function userExists(ByVal ctx As PrincipalContext, ByVal user As UserDetails) As Boolean
+    Public Function userExists(ByRef ctx As PrincipalContext, ByRef user As UserDetails) As Boolean
         Dim usr As UserPrincipal = UserPrincipal.FindByIdentity(ctx, user.Username)
         If usr IsNot Nothing Then
             usr.Dispose()
+            usr = Nothing
             Return True
         Else
             Return False
         End If
     End Function
 
-    Public Sub addToGroups(ByVal ctx As PrincipalContext, ByVal user As UserDetails)
+    Public Sub addToGroups(ByRef ctx As PrincipalContext, ByRef user As UserDetails)
         ' add User to group
         If user.Groups.Count > 0 Then
             For Each group As String In user.Groups
@@ -93,7 +94,7 @@ Public Module ADTools
         End If
     End Sub
 
-    Public Function getUserPrincipalByID(ByVal ctx As PrincipalContext, ByVal admission As String) As DirectoryServices.AccountManagement.UserPrincipal
+    Public Function getUserPrincipalByID(ByRef ctx As PrincipalContext, ByRef admission As String) As DirectoryServices.AccountManagement.UserPrincipal
         Dim userList As New List(Of DirectoryServices.AccountManagement.UserPrincipal)
         Dim searchusr As DirectoryServices.AccountManagement.UserPrincipal = New DirectoryServices.AccountManagement.UserPrincipal(ctx)
         searchusr.EmployeeId = admission
@@ -118,7 +119,7 @@ Public Module ADTools
         Return userList(0)
     End Function
 
-    Public Function getGroupPrincipalbyName(ByVal ctx As PrincipalContext, group As String) As GroupPrincipal
+    Public Function getGroupPrincipalbyName(ByRef ctx As PrincipalContext, group As String) As GroupPrincipal
         Try
             Dim usr As GroupPrincipal = GroupPrincipal.FindByIdentity(ctx, group)
             Return usr
@@ -127,7 +128,7 @@ Public Module ADTools
         End Try
     End Function
 
-    Public Function addUserToGroup(ByVal ctx As PrincipalContext, user As String, ByVal group As String) As String
+    Public Function addUserToGroup(ByRef ctx As PrincipalContext, user As String, ByRef group As String) As String
         Try
             Dim usr As DirectoryServices.AccountManagement.UserPrincipal = getUserPrincipalbyUsername(userCTX, user)
             Dim grp As GroupPrincipal = getGroupPrincipalbyName(ctx, group)
@@ -135,6 +136,8 @@ Public Module ADTools
                 grp.Members.Add(usr)
             End If
             grp.Save()
+            grp.dispose()
+            grp = Nothing
             Return "ok"
         Catch ex As Exception
             Return ex.Message
@@ -142,7 +145,7 @@ Public Module ADTools
         End Try
     End Function
 
-    Public Function removeUserFromGroup(ByVal ctx As PrincipalContext, user As String, group As String) As String
+    Public Function removeUserFromGroup(ByRef ctx As PrincipalContext, user As String, group As String) As String
         Try
             Dim usr As DirectoryServices.AccountManagement.UserPrincipal = getUserPrincipalbyUsername(userCTX, user)
             Dim grp As GroupPrincipal = getGroupPrincipalbyName(ctx, group)
@@ -150,6 +153,8 @@ Public Module ADTools
                 grp.Members.Remove(usr)
             End If
             grp.Save()
+            grp.dispose()
+            grp = Nothing
             Return "ok"
         Catch ex As Exception
             Return ex.Message
@@ -157,7 +162,7 @@ Public Module ADTools
         End Try
     End Function
 
-    Public Function createUser(ByVal ctx As PrincipalContext, ByVal user As UserDetails) As createStatus
+    Public Function createUser(ByRef ctx As PrincipalContext, ByRef user As UserDetails) As createStatus
         'User already exist?
         If Not userExists(ctx, user) Then
             Dim lusr = New UserPrincipal(ctx)
@@ -180,7 +185,7 @@ Public Module ADTools
 
     End Function
 
-    Private Sub modify(ByVal ctx As PrincipalContext, ByVal user As UserDetails)
+    Private Sub modify(ByRef ctx As PrincipalContext, ByRef user As UserDetails)
         Dim usr As UserPrincipalex = UserPrincipalex.FindByIdentity(ctx, user.Username)
         If usr Is Nothing Then
             Throw New Exception("User Doesn't Exist")
@@ -219,7 +224,7 @@ Public Module ADTools
         usr.Dispose()
     End Sub
 
-    Public Function getUserPrincipalexbyUsername(ByVal ctx As PrincipalContext, userName As String) As UserPrincipalex
+    Public Function getUserPrincipalexbyUsername(ByRef ctx As PrincipalContext, userName As String) As UserPrincipalex
         Try
             Dim usr As UserPrincipalex = UserPrincipalex.FindByIdentity(ctx, userName)
             Return usr
@@ -228,7 +233,7 @@ Public Module ADTools
         End Try
     End Function
 
-    Public Function getUserPrincipalbyUsername(ByVal ctx As PrincipalContext, userName As String) As UserPrincipal
+    Public Function getUserPrincipalbyUsername(ByRef ctx As PrincipalContext, userName As String) As UserPrincipal
         Try
             Dim usr As DirectoryServices.AccountManagement.UserPrincipal = DirectoryServices.AccountManagement.UserPrincipal.FindByIdentity(ctx, userName)
             Return usr
@@ -237,7 +242,7 @@ Public Module ADTools
         End Try
     End Function
 
-    Public Function getUserPrincipalsByFullName(ByVal ctx As PrincipalContext, fullname As String) As List(Of DirectoryServices.AccountManagement.UserPrincipal)
+    Public Function getUserPrincipalsByFullName(ByRef ctx As PrincipalContext, fullname As String) As List(Of DirectoryServices.AccountManagement.UserPrincipal)
         Dim userlist As New List(Of DirectoryServices.AccountManagement.UserPrincipal)
         Dim searchusr As DirectoryServices.AccountManagement.UserPrincipal = New DirectoryServices.AccountManagement.UserPrincipal(ctx)
         searchusr.GivenName = fullname.Split(" ")(0)
@@ -250,7 +255,7 @@ Public Module ADTools
         Return userlist
     End Function
 
-    Public Function getUserPrincipalByAdmission(ByVal ctx As PrincipalContext, ByVal admission As String) As DirectoryServices.AccountManagement.UserPrincipal
+    Public Function getUserPrincipalByAdmission(ByRef ctx As PrincipalContext, ByRef admission As String) As DirectoryServices.AccountManagement.UserPrincipal
         Dim userList As New List(Of DirectoryServices.AccountManagement.UserPrincipal)
         Dim searchusr As DirectoryServices.AccountManagement.UserPrincipal = New DirectoryServices.AccountManagement.UserPrincipal(ctx)
         searchusr.EmployeeId = admission
@@ -273,7 +278,7 @@ Public Module ADTools
         Return userList(0)
     End Function
 
-    Public Function getAllUsers(ByVal ctx) As List(Of UserPrincipalex)
+    Public Function getAllUsers(ByRef ctx) As List(Of UserPrincipalex)
         Dim userlist As New List(Of UserPrincipalex)
         Dim searchusr As UserPrincipalex = New UserPrincipalex(ctx)
         Dim searcher As PrincipalSearcher = New PrincipalSearcher(searchusr)
@@ -285,7 +290,7 @@ Public Module ADTools
         Return userlist
     End Function
 
-    Public Function getAllComputers(ByVal ctx) As List(Of ComputerPrincipal)
+    Public Function getAllComputers(ByRef ctx) As List(Of ComputerPrincipal)
         Dim computerList As New List(Of ComputerPrincipal)
         Try
             Dim searchComputer As ComputerPrincipal = New ComputerPrincipal(ctx)
@@ -304,7 +309,7 @@ Public Module ADTools
         Return computerList
     End Function
 
-    Public Function getGroupsByUser(ByVal id As String) As List(Of String)
+    Public Function getGroupsByUser(ByRef id As String) As List(Of String)
         Dim grps As New List(Of String)
         Dim usr As UserPrincipal = getUserPrincipalByID(userCTX, id)
         Dim usrGrps As PrincipalSearchResult(Of Principal) = usr.GetGroups()
@@ -314,7 +319,7 @@ Public Module ADTools
         Return grps
     End Function
 
-    Public Function getManagedGroups(ByVal ctx) As List(Of GroupPrincipal)
+    Public Function getManagedGroups(ByRef ctx) As List(Of GroupPrincipal)
         Dim groupList As New List(Of GroupPrincipal)
         Dim searchgrp As New GroupPrincipal(ctx)
         Dim searcher As New PrincipalSearcher(searchgrp)
@@ -342,7 +347,7 @@ Public Module ADTools
         Return grpNames
     End Function
 
-    Public Function createGroup(ByVal ctx As PrincipalContext, ByVal groupName As String) As GroupPrincipal
+    Public Function createGroup(ByRef ctx As PrincipalContext, ByRef groupName As String) As GroupPrincipal
         If groupName.Contains("&") Then
             groupName = groupName.Replace("&", "and")
         End If
@@ -368,7 +373,7 @@ Public Module ADTools
         Return Nothing
     End Function
 
-    Public Function getGroup(ByVal ctx As PrincipalContext, ByVal groupName As String) As GroupPrincipal
+    Public Function getGroup(ByRef ctx As PrincipalContext, ByRef groupName As String) As GroupPrincipal
         Try
             Dim usr As GroupPrincipal = GroupPrincipal.FindByIdentity(ctx, groupName)
             Return usr
@@ -383,7 +388,7 @@ Public Module ADTools
     ''' </summary>
     ''' <param name="name">is this name a samAccountName</param>
     ''' <returns>true if name = user, false if not.</returns>
-    Public Function isUser(ByVal name As String) As Boolean
+    Public Function isUser(ByRef name As String) As Boolean
         Dim myctx As PrincipalContext = ADTools.getConnection(SchoolSettings.domain, SchoolSettings.usersCTXString)
         If IsNothing(UserPrincipal.FindByIdentity(myctx, name)) Then
             myctx.Dispose()
@@ -394,7 +399,7 @@ Public Module ADTools
         End If
     End Function
 
-    Public Function getGroupMembers(ByVal name As String) As List(Of String)
+    Public Function getGroupMembers(ByRef name As String) As List(Of String)
         Dim mylist As New List(Of String)
         Dim myctx As PrincipalContext = ADTools.getConnection(SchoolSettings.domain, SchoolSettings.groupsCTXString)
         Dim theGroup As GroupPrincipal = getGroup(myctx, name)
@@ -436,7 +441,7 @@ Public Module ADTools
         Return uTree
     End Function
 
-    Public Sub addUserToTree(ByVal user As UserPrincipalex, ByVal uTree As ObjectTree)
+    Public Sub addUserToTree(ByRef user As UserPrincipalex, ByRef uTree As ObjectTree)
         'get treeNode from user's DistingushedName
         Dim locations As String() = reverseArray(user.DistinguishedName.Split(","))
         Dim treeNode As ObjectTree = getReleventNode(locations, uTree)
@@ -450,7 +455,7 @@ Public Module ADTools
         n.group = Nothing
         treeNode.objectList.Add(n)
     End Sub
-    Public Sub addGroupToTree(ByVal grp As GroupPrincipal, ByVal uTree As ObjectTree)
+    Public Sub addGroupToTree(ByRef grp As GroupPrincipal, ByRef uTree As ObjectTree)
         Dim locations As String() = reverseArray(grp.DistinguishedName.Split(","))
         Dim treeNode As ObjectTree = getReleventNode(locations, uTree)
         If treeNode.objectList Is Nothing Then
@@ -464,7 +469,7 @@ Public Module ADTools
         treeNode.objectList.Add(n)
     End Sub
 
-    Public Function getReleventNode(ByVal locations As String(), ByVal cNode As ObjectTree) As ObjectTree
+    Public Function getReleventNode(ByRef locations As String(), ByRef cNode As ObjectTree) As ObjectTree
         Dim ObjectNode As ObjectTree = cNode
         For i As Integer = 2 To locations.Count - 2
             ObjectNode = findMatchingNode(locations(i), ObjectNode)
@@ -472,7 +477,7 @@ Public Module ADTools
         Return ObjectNode
     End Function
 
-    Public Function findMatchingNode(ByVal locationName As String, cNode As ObjectTree) As ObjectTree
+    Public Function findMatchingNode(ByRef locationName As String, cNode As ObjectTree) As ObjectTree
         If cNode.children IsNot Nothing Then
             For Each node As ObjectTree In cNode.children
                 If node.name.Equals(locationName) Then
@@ -489,12 +494,12 @@ Public Module ADTools
         Return newNode
     End Function
 
-    Public Function getNodeByPath(ByVal path As String) As ObjectTree
+    Public Function getNodeByPath(ByRef path As String) As ObjectTree
         rflag = False
         Return (getNodeByPath(path, myUTree))
     End Function
 
-    Private Function getNodeByPath(ByVal path As String, treeNode As ObjectTree) As ObjectTree
+    Private Function getNodeByPath(ByRef path As String, treeNode As ObjectTree) As ObjectTree
         If rflag Then Return treeNode
         If treeNode.children Is Nothing Then
             rflag = True
@@ -516,7 +521,7 @@ Public Module ADTools
     ''' <param name="path"></param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public Function getADPath(ByVal path As String) As String
+    Public Function getADPath(ByRef path As String) As String
         Dim backPath As String() = reverseArray(path.Split(","))
         Dim returnString As String = String.Join(",", backPath)
         Return returnString.Substring(1)
@@ -651,7 +656,7 @@ Public Class UserPrincipalex
 
     End Function
 
-    Public Function waitTillAvailable(ByVal domain As String, ByVal userdetails As UserDetails, ByVal path As String) As PrincipalContext
+    Public Function waitTillAvailable(ByRef domain As String, ByRef userdetails As UserDetails, ByRef path As String) As PrincipalContext
         Dim myctx As PrincipalContext
 
         myctx = ADTools.getConnection(domain, path)

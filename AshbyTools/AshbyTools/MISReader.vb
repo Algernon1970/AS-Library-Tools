@@ -1,8 +1,6 @@
 ﻿Imports System.Windows.Forms
 
 Public Module MISReader
-    Dim bromcomReader As SoapReader.TPReadOnlyDataServiceSoapClient = New SoapReader.TPReadOnlyDataServiceSoapClient()
-
     Dim bromcomdata As New DataSet
     Dim soapUser As String = "petessoaptest"
     Dim soapPass As String = "purple"
@@ -25,12 +23,15 @@ Public Module MISReader
     ''' <param name="filter">an SQL filter to limit the records in the table.</param>
     ''' <returns>The datatable containing the data requested by the filter.</returns>
     Public Function getTable(ByVal tablename As String, ByVal filter As String) As DataTable
+        Dim bromcomReader As SoapReader.TPReadOnlyDataServiceSoapClient = New SoapReader.TPReadOnlyDataServiceSoapClient()
         Try
             Dim getTable_Table As DataTable
             getTable_Table = Nothing
             getTable_Table = Nothing
             getTable_Table = bromcomReader.getEntityData(tablename, filter, soapUser, soapPass).Tables(0)
             getTable_Table.TableName = tablename
+            bromcomReader.Close()
+            bromcomReader = Nothing
             Return getTable_Table.Copy
         Catch ex As Exception
             Throw New MISException("Not Found : " & filter)
