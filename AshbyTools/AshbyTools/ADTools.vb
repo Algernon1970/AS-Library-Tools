@@ -144,9 +144,9 @@ Public Module ADTools
 
     Public Function removeUserFromGroup(ByVal ctx As PrincipalContext, user As String, group As String) As String
         Try
-            Dim usr As DirectoryServices.AccountManagement.UserPrincipal = getUserPrincipalbyUsername(ctx, user)
+            Dim usr As DirectoryServices.AccountManagement.UserPrincipal = getUserPrincipalbyUsername(userCTX, user)
             Dim grp As GroupPrincipal = getGroupPrincipalbyName(ctx, group)
-            If grp.Members.Contains(ctx, IdentityType.SamAccountName, usr.SamAccountName) Then
+            If grp.Members.Contains(userCTX, IdentityType.SamAccountName, usr.SamAccountName) Then
                 grp.Members.Remove(usr)
             End If
             grp.Save()
