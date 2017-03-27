@@ -305,7 +305,6 @@ Public Module ADTools
 
         End Try
 
-
         Return computerList
     End Function
 
@@ -606,6 +605,19 @@ Public Class UserPrincipalex
         End Get
         Set(value As String)
             ExtensionSet("extensionAttribute4", value)
+        End Set
+    End Property
+
+    <DirectoryProperty("extensionAttribute5")>
+    Public Property extensionAttribute5() As String
+        Get
+            If ExtensionGet("extensionAttribute5").Length <> 1 Then
+                Return String.Empty
+            End If
+            Return DirectCast(ExtensionGet("extensionAttribute5")(0), String)
+        End Get
+        Set(value As String)
+            ExtensionSet("extensionAttribute5", value)
         End Set
     End Property
 
