@@ -44,6 +44,14 @@
     <OptionInfer>On</OptionInfer>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.SharePoint.Client, Version=16.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>ExternalDLL\Microsoft.SharePoint.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.SharePoint.Client.Runtime, Version=16.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>ExternalDLL\Microsoft.SharePoint.Client.Runtime.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Data" />
@@ -164,6 +172,33 @@
       <Generator>WCF Proxy Generator</Generator>
       <LastGenOutput>Reference.vb</LastGenOutput>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="ExternalDLL\Microsoft.Office.Client.Policy.dll" />
+    <Content Include="ExternalDLL\Microsoft.Office.Client.Policy.Portable.dll" />
+    <Content Include="ExternalDLL\Microsoft.Office.Client.TranslationServices.dll" />
+    <Content Include="ExternalDLL\Microsoft.Office.Client.TranslationServices.Portable.dll" />
+    <Content Include="ExternalDLL\Microsoft.SharePoint.Client.dll" />
+    <Content Include="ExternalDLL\Microsoft.SharePoint.Client.DocumentManagement.dll" />
+    <Content Include="ExternalDLL\Microsoft.SharePoint.Client.DocumentManagement.Portable.dll" />
+    <Content Include="ExternalDLL\Microsoft.SharePoint.Client.Portable.dll" />
+    <Content Include="ExternalDLL\Microsoft.SharePoint.Client.Publishing.dll" />
+    <Content Include="ExternalDLL\Microsoft.SharePoint.Client.Publishing.Portable.dll" />
+    <Content Include="ExternalDLL\Microsoft.SharePoint.Client.Runtime.dll" />
+    <Content Include="ExternalDLL\Microsoft.SharePoint.Client.Runtime.Portable.dll" />
+    <Content Include="ExternalDLL\Microsoft.SharePoint.Client.Runtime.Windows.dll" />
+    <Content Include="ExternalDLL\Microsoft.SharePoint.Client.Runtime.WindowsPhone.dll" />
+    <Content Include="ExternalDLL\Microsoft.SharePoint.Client.Runtime.WindowsStore.dll" />
+    <Content Include="ExternalDLL\Microsoft.SharePoint.Client.Search.Applications.dll" />
+    <Content Include="ExternalDLL\Microsoft.SharePoint.Client.Search.Applications.Portable.dll" />
+    <Content Include="ExternalDLL\Microsoft.SharePoint.Client.Search.dll" />
+    <Content Include="ExternalDLL\Microsoft.SharePoint.Client.Search.Portable.dll" />
+    <Content Include="ExternalDLL\Microsoft.SharePoint.Client.Taxonomy.dll" />
+    <Content Include="ExternalDLL\Microsoft.SharePoint.Client.Taxonomy.Portable.dll" />
+    <Content Include="ExternalDLL\Microsoft.SharePoint.Client.UserProfiles.dll" />
+    <Content Include="ExternalDLL\Microsoft.SharePoint.Client.UserProfiles.Portable.dll" />
+    <Content Include="ExternalDLL\Microsoft.SharePoint.Client.WorkflowServices.dll" />
+    <Content Include="ExternalDLL\Microsoft.SharePoint.Client.WorkflowServices.Portable.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

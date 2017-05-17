@@ -1,7 +1,9 @@
 ﻿Module SchoolSettings
     Public classCTXString As String = "OU=Subject Groups, OU=Security Groups, OU=AS Groups, OU=Ashby School, DC=as, DC=Internal"
-    Public groupsCTXString As String = "OU=AS Groups, OU=Ashby School, DC=as, DC= Internal"
+    Public groupsCTXString As String = "OU=Security Groups, OU=AS Groups, OU=Ashby School, DC=as, DC= Internal"
     Public staffGroupsCTXString As String = "OU=Staff Groups,OU=Security Groups,OU=AS Groups, OU=Ashby School, DC=as, DC= Internal"
+    Public SubjectGroupsCTXString As String = "OU=Subject Groups,OU=Security Groups,OU=AS Groups, OU=Ashby School, DC=as, DC= Internal"
+    Public TutorGroupsCTXString As String = "OU=Tutor Groups,OU=Security Groups,OU=AS Groups, OU=Ashby School, DC=as, DC= Internal"
     Public usersCTXString As String = "OU=AS Users, OU=Ashby School, DC=as, DC=Internal"
     Public tutorsCTXString As String = "OU=Tutor Groups, OU=Security Groups, OU=AS Groups, OU=Ashby School, DC=as, DC=Internal"
     Public yearCTXString As String = "OU=Distribution Groups, OU=AS Groups, OU=Ashby School, DC=as, DC=Internal"

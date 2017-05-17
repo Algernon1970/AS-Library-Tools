@@ -6,11 +6,12 @@ Imports System.Windows.Forms
 Public Module ADTools
     Dim msg As New eMailMessage
     Public userCTX As PrincipalContext = getConnection("as.internal", usersCTXString)
-    Public tutorsCTX As PrincipalContext = getConnection("as.internal", tutorsCTXString)
     Public yearCTX As PrincipalContext = getConnection("as.internal", yearCTXString)
     Public classCTX As PrincipalContext = getConnection("as.internal", classCTXString)
     Public groupsCTX As PrincipalContext = getConnection("as.internal", groupsCTXString)
     Public staffGroupsCTX As PrincipalContext = getConnection("as.internal", staffGroupsCTXString)
+    Public subjectGroupsCTX As PrincipalContext = getConnection("as.internal", SubjectGroupsCTXString)
+    Public tutorGroupsCTX As PrincipalContext = getConnection("as.internal", TutorGroupsCTXString)
     Dim myUTree As ObjectTree
     Dim rflag As Boolean = False
 
@@ -328,9 +329,9 @@ Public Module ADTools
         Return groupList
     End Function
 
-    Public Function getManagedGroupNames() As List(Of String)
+    Public Function getManagedGroupNames(ByRef ctx) As List(Of String)
         Dim grpNames As New List(Of String)
-        Dim grps As List(Of GroupPrincipal) = getManagedGroups(groupsCTX)
+        Dim grps As List(Of GroupPrincipal) = getManagedGroups(ctx)
         For Each grp In grps
             grpNames.Add(grp.Name)
         Next

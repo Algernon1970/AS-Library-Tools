@@ -1,4 +1,5 @@
 ﻿Imports System.IO
+Imports System.Security
 
 Public Module Utils
     Public Function reverseArray(ByVal inp() As String) As String()
@@ -28,5 +29,15 @@ Public Module Utils
         End If
         Directory.Delete(path)
     End Sub
+
+    Public Function convertToSecureString(str As String) As SecureString
+        Dim secureStr = New SecureString()
+        If str.Length > 0 Then
+            For Each c In str.ToCharArray()
+                secureStr.AppendChar(c)
+            Next
+        End If
+        Return secureStr
+    End Function
 
 End Module

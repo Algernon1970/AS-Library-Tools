@@ -273,6 +273,19 @@ Public Module MISReader
         Return so
     End Function
 
+    Public Function getStudentClassList(ByVal sid As String) As List(Of String)
+        Return getStudentObject(sid).classlist
+    End Function
+
+    Public Function getStudentTutorGroup(ByVal sid As String) As String
+        Try
+            Return getStudentRows(sid)(0).Field(Of String)("TutorGroup")
+        Catch ex As Exception
+            Return "Unknown"
+        End Try
+
+    End Function
+
 
     Private Function getStudentInfoTables() As DataTable
         Dim tempTable As DataTable

@@ -1,4 +1,6 @@
 ﻿Imports System.Security.AccessControl
+Imports System.IO
+Imports System.Security
 
 Public Class FileOperations
 
@@ -33,6 +35,56 @@ Public Class FileOperations
         Else
             Return False
         End If
+    End Function
+
+    Public Shared Function copyToSP(origFile As String, library As String, share As String, user As String, passwd As SecureString) As String
+        Try
+            Dim spcontext As New Microsoft.SharePoint.Client.ClientContext(library)
+            Dim creds As New Microsoft.SharePoint.Client.SharePointOnlineCredentials(user, passwd)
+            spcontext.Credentials = creds
+
+            Dim spLib = spcontext.Web.Lists.GetByTitle(share)
+            spcontext.Load(spLib)
+            spcontext.ExecuteQuery()
+
+            Dim fs As New FileStream(origFile, FileMode.Open)
+            Dim fci As New Microsoft.SharePoint.Client.FileCreationInformation
+            fci.Overwrite = True
+            fci.ContentStream = fs
+            fci.Url = Path.GetFileName(origFile)
+
+            Dim upload = spLib.RootFolder.Files.Add(fci)
+            spcontext.Load(upload)
+            spcontext.Load(spLib.ContentTypes)
+            spcontext.ExecuteQuery()
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+        Return "OK"
+    End Function
+
+    Public Shared Function deleteFromSP(fname As String, library As String, Share As String, user As String, passwd As SecureString) As String
+        Try
+            Dim spcontext As New Microsoft.SharePoint.Client.ClientContext(library)
+            Dim creds As New Microsoft.SharePoint.Client.SharePointOnlineCredentials(user, passwd)
+            spcontext.Credentials = creds
+
+            Dim spLib = spcontext.Web.Lists.GetByTitle(Share)
+            Dim query As New Microsoft.SharePoint.Client.CamlQuery()
+            query.ViewXml = String.Format("<View><Query><Where><Eq><FieldRef Name='FileLeafRef'/><Value Type='File'>{0}</Value></Eq></Where></Query></View>", fname)
+            Dim listItems = spLib.GetItems(query)
+            spcontext.Load(listItems)
+            spcontext.ExecuteQuery()
+            For Each listItem In listItems
+                listItem.DeleteObject()
+                spcontext.ExecuteQuery()
+            Next
+
+
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+        Return "OK"
     End Function
 
 End Class
