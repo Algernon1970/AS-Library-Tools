@@ -11,6 +11,7 @@ Public Module MISReader
     Public currentStaffFilter As String = "GETDATE() BETWEEN StartDate AND ISNULL(EndDate, GETDATE())"
     Public futureFilter As String = "StartDate > GETDATE()"
     Public leaversFilter As String = "EndDate < GETDATE()"
+    Public fullFilter As String = "StartDate < GETDATE()"
 
     Public Sub dropStudentInfoTable()
         studentInfoTable = Nothing
@@ -289,7 +290,7 @@ Public Module MISReader
 
     Private Function getStudentInfoTables() As DataTable
         Dim tempTable As DataTable
-        tempTable = getTable("Students", currentStudentsFilter)
+        tempTable = getTable("Students", fullFilter)
         tempTable.TableName = "currentStudents"
         bromcomdata.Tables.Add(tempTable)
 

@@ -40,4 +40,19 @@ Public Module Utils
         Return secureStr
     End Function
 
+    ''' <summary>
+    ''' Map a value from one range of integers onto another.
+    ''' e.g. interpolate(0,100,10,20,5) returns the %age 5 is between 10 and 20
+    ''' </summary>
+    ''' <param name="newMinimum"></param>
+    ''' <param name="newMaximum"></param>
+    ''' <param name="oldMinimum"></param>
+    ''' <param name="oldMaximum"></param>
+    ''' <param name="value">The value to map</param>
+    ''' <returns>The mapped value</returns>
+    Public Function interpolate(newMinimum As Integer, newMaximum As Integer, oldMinimum As Integer, oldMaximum As Integer, value As Integer) As Integer
+        Dim scaleFactor As Double = Convert.ToDouble((newMaximum - newMinimum) / (oldMaximum - oldMinimum))
+        Return Convert.ToInt16(newMinimum + ((value - oldMinimum) * scaleFactor))
+    End Function
+
 End Module
