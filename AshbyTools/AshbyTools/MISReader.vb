@@ -40,6 +40,11 @@ Public Module MISReader
 
     End Function
 
+    Public Function getEntities() As DataTable
+        Dim bromcomReader As SoapReader.TPReadOnlyDataServiceSoapClient = New SoapReader.TPReadOnlyDataServiceSoapClient()
+        Return bromcomreader.findEntities(soapUser, soapPass).Tables(0)
+    End Function
+
     ''' <summary>
     ''' Get a UserInfo object representing a member of staff from the Staff Table in Bromcom
     ''' If there is more than 1 user matching the given filter, prompt the user for the correct user.
@@ -210,15 +215,18 @@ Public Module MISReader
     End Function
 
     Public Function getHouseFromGroup(ByRef hs As String) As String
-        If hs.ToLower.StartsWith("got") Then Return "Undefined"
-        If hs.ToLower.StartsWith("a") Then Return "Ashe"
-        If hs.ToLower.StartsWith("b") Then Return "Bullen"
-        If hs.ToLower.StartsWith("c") Then Return "Crewe"
-        If hs.ToLower.StartsWith("e") Then Return "Erdington"
-        If hs.ToLower.StartsWith("f") Then Return "Ferrers"
-        If hs.ToLower.StartsWith("g") Then Return "Gylby"
-        If hs.ToLower.StartsWith("h") Then Return "Hastings"
-        If hs.ToLower.StartsWith("l") Then Return "Loudoun"
+        If Not isnothing(hs) Then
+            If hs.ToLower.StartsWith("got") Then Return "Undefined"
+            If hs.ToLower.StartsWith("a") Then Return "Ashe"
+            If hs.ToLower.StartsWith("b") Then Return "Bullen"
+            If hs.ToLower.StartsWith("c") Then Return "Crewe"
+            If hs.ToLower.StartsWith("e") Then Return "Erdington"
+            If hs.ToLower.StartsWith("f") Then Return "Ferrers"
+            If hs.ToLower.StartsWith("g") Then Return "Gylby"
+            If hs.ToLower.StartsWith("h") Then Return "Hastings"
+            If hs.ToLower.StartsWith("l") Then Return "Loudoun"
+        End If
+
         Return "NONE"
     End Function
 

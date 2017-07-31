@@ -10,6 +10,7 @@ Public Module ADTools
     Public classCTX As PrincipalContext = getConnection("as.internal", classCTXString)
     Public groupsCTX As PrincipalContext = getConnection("as.internal", groupsCTXString)
     Public staffGroupsCTX As PrincipalContext = getConnection("as.internal", staffGroupsCTXString)
+    Public tlGroupsCTX As PrincipalContext = getConnection("as.internal", tlGroupsCTXString)
     Public subjectGroupsCTX As PrincipalContext = getConnection("as.internal", SubjectGroupsCTXString)
     Public tutorGroupsCTX As PrincipalContext = getConnection("as.internal", TutorGroupsCTXString)
     Dim myUTree As ObjectTree
@@ -443,7 +444,7 @@ Public Module ADTools
 
     Public Sub addUserToTree(ByRef user As UserPrincipalex, ByRef uTree As ObjectTree)
         'get treeNode from user's DistingushedName
-        Dim locations As String() = reverseArray(user.DistinguishedName.Split(","))
+        Dim locations As String() = arrayReverse(user.DistinguishedName.Split(","))
         Dim treeNode As ObjectTree = getReleventNode(locations, uTree)
         If treeNode.objectList Is Nothing Then
             treeNode.objectList = New List(Of NodeContainer)
@@ -456,7 +457,7 @@ Public Module ADTools
         treeNode.objectList.Add(n)
     End Sub
     Public Sub addGroupToTree(ByRef grp As GroupPrincipal, ByRef uTree As ObjectTree)
-        Dim locations As String() = reverseArray(grp.DistinguishedName.Split(","))
+        Dim locations As String() = arrayReverse(grp.DistinguishedName.Split(","))
         Dim treeNode As ObjectTree = getReleventNode(locations, uTree)
         If treeNode.objectList Is Nothing Then
             treeNode.objectList = New List(Of NodeContainer)
@@ -522,7 +523,7 @@ Public Module ADTools
     ''' <returns></returns>
     ''' <remarks></remarks>
     Public Function getADPath(ByRef path As String) As String
-        Dim backPath As String() = reverseArray(path.Split(","))
+        Dim backPath As String() = arrayReverse(path.Split(","))
         Dim returnString As String = String.Join(",", backPath)
         Return returnString.Substring(1)
     End Function

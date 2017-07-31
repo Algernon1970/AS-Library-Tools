@@ -2,10 +2,10 @@
 Imports System.Security
 
 Public Module Utils
-    Public Function reverseArray(ByVal inp() As String) As String()
-        Dim outArray(inp.Count) As String
+    Public Function arrayReverse(ByVal inp() As String) As String()
+        Dim outArray(inp.Count - 1) As String
         For i As Integer = 0 To inp.Count - 1
-            outArray(inp.Count - i) = inp(i)
+            outArray((inp.Count - i) - 1) = inp(i)
         Next
         Return outArray
     End Function
