@@ -102,7 +102,13 @@ Public Class FileOperations
             query.ViewXml = String.Format("<View><Query><Where><Eq><FieldRef Name='FileLeafRef'/><Value Type='File'>{0}</Value></Eq></Where></Query></View>", fname)
             Dim listItems = spLib.GetItems(query)
             spcontext.Load(listItems)
-            spcontext.ExecuteQuery()
+            Try
+                spcontext.ExecuteQuery()
+            Catch ex As Exception
+                Dim heck As String = ex.message
+
+            End Try
+
             For Each listItem In listItems
                 spcontext.Load(listItem)
                 spcontext.ExecuteQuery()

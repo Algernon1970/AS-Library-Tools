@@ -9,7 +9,7 @@ Imports System.Runtime.InteropServices
 ' Review the values of the assembly attributes
 
 <Assembly: AssemblyTitle("AshbyTools")>
-<Assembly: AssemblyDescription("Useful library")>
+<Assembly: AssemblyDescription("Useful library x64")>
 <Assembly: AssemblyCompany("")>
 <Assembly: AssemblyProduct("AshbyTools")>
 <Assembly: AssemblyCopyright("Copyright ©  2016")> 

@@ -147,7 +147,7 @@ Public Class ADBrowser
 
         Dim usr As UserPrincipal = ADTools.getUserPrincipalexbyUsername(userCTX, res)
         Dim bits As String() = usr.DistinguishedName.Split(",")
-        Dim stib As String() = reverseArray(bits)
+        Dim stib As String() = arrayReverse(bits)
 
         For Each element As String In stib
             openNode(AdTreeView1.Nodes(0), element)
