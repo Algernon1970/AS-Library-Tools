@@ -8,6 +8,7 @@
     Public usersCTXString As String = "OU=AS Users, OU=Ashby School, DC=as, DC=Internal"
     Public tutorsCTXString As String = "OU=Tutor Groups, OU=Security Groups, OU=AS Groups, OU=Ashby School, DC=as, DC=Internal"
     Public yearCTXString As String = "OU=Distribution Groups, OU=AS Groups, OU=Ashby School, DC=as, DC=Internal"
+    Public ComputerCTXString As String = "OU=AS Workstations, OU=Ashby School, DC=as, DC=Internal"
     Public studentOUPATH As String = "OU=20{0} Students, OU=Students, OU=School Users, OU=AS Users, OU=Ashby School, DC=as, DC=internal"
     Public studentADPath As String = "OU=20{0} Students, OU=Students, OU=School Users, {1}"
     Public tlou As String = "dc=as, dc=intenal"

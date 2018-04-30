@@ -13,6 +13,7 @@ Public Module ADTools
     Public tlGroupsCTX As PrincipalContext = getConnection("as.internal", tlGroupsCTXString)
     Public subjectGroupsCTX As PrincipalContext = getConnection("as.internal", SubjectGroupsCTXString)
     Public tutorGroupsCTX As PrincipalContext = getConnection("as.internal", TutorGroupsCTXString)
+    Public computerCTX As PrincipalContext = getConnection("as.internal", ComputerCTXString)
     Dim myUTree As ObjectTree
     Dim rflag As Boolean = False
 
@@ -124,6 +125,15 @@ Public Module ADTools
     Public Function getGroupPrincipalbyName(ByRef ctx As PrincipalContext, group As String) As GroupPrincipal
         Try
             Dim usr As GroupPrincipal = GroupPrincipal.FindByIdentity(ctx, group)
+            Return usr
+        Catch ex As Exception
+            Throw
+        End Try
+    End Function
+
+    Public Function getComputerPrincipalByName(ByRef ctx As PrincipalContext, name As String) As ComputerPrincipal
+        Try
+            Dim usr As ComputerPrincipal = ComputerPrincipal.FindByIdentity(ctx, name)
             Return usr
         Catch ex As Exception
             Throw
